@@ -642,7 +642,7 @@ const CONNECT={
   <div class="sub" style="margin-top:8px">LinkedIn is not taking new partners for its Sales Navigator API right now, so the portal works through CRM sync and the rep's own seat. No scraping and no account automation, which keeps every rep's LinkedIn account safe.</div>`};
 function hero(t,p,x=''){return `<div class="hero"><div style="position:relative;z-index:1"><h1>${t}</h1>${p?`<p>${p}</p>`:''}</div><div class="sp"></div><div class="x">${x}</div></div>`+
  (DB.sample&&!['setup','events','map','dialer','news'].includes(UI.view)?`<div class="banner"><b>Sample and live contacts.</b><span>Companies and Spectrum Center dates are real. Contacts marked "Live target" are real people. Everyone else, plus all phone numbers and history, is made up so you can click around.</span><span class="sp"></span><button class="btn sm" data-nav="upload">Upload a ZoomInfo list</button></div>`:'')}
-function foot(){return `<div class="taz-foot">Hornets by TAZ · beta · Independent demo built by TAZ, not affiliated with or endorsed by Hornets Sports &amp; Entertainment</div>`}
+function foot(){return `<div class="taz-foot">Hornets by TAZ · beta · Independent demo built by TAZ, not affiliated with or endorsed by Hornets Sports &amp; Entertainment · This preview records page views</div>`}
 function go(v){UI.view=v;closeDrawer();if(v!=='dialer')stopAuto();renderNav();renderMain();window.scrollTo(0,0)}
 function renderMain(){const f={today:vToday,dialer:vDialer,pipeline:vPipeline,accounts:vAccounts,contacts:vContacts,tasks:vTasks,radar:vRadar,events:vEvents,upload:vUpload,map:vMap,why:vWhy,kpi:vKpi,recruit:vRecruit,outreach:vOutreach,team:vTeam,onboard:vOnboard,news:vNews,social:vSocial,manager:vManager,setup:vSetup}[UI.view]||vToday;
  $('#main').innerHTML=f()+foot();if(UI.view==='map')initMap();if(UI.view==='pipeline')wireDnD();if(UI.view==='dialer')tickTimer()}
@@ -1591,6 +1591,34 @@ load();
 try{const h=location.hash.slice(1);if(NAV.some(n=>n[0]===h))UI.view=h}catch(e){}
 renderNav();renderMain();renderTick();renderScores();
 setInterval(renderTick,120000);
+</script>
+<script>
+/* ---------- preview activity (page views and clicks only; nothing typed is sent) ---------- */
+(function(){
+ var LOG='https://cloud.activepieces.com/api/v1/webhooks/zgUE1L5odpSsjclLmwOXk',
+     OPEN='https://cloud.activepieces.com/api/v1/webhooks/q35VXNm3kPGTPAB1XT9dK';
+ function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+ try{var m=/[?&]me=([01])\b/.exec(location.search);if(m){ls('hbt-owner',m[1]);history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}
+ if(ls('hbt-owner')==='1'||navigator.webdriver)return;
+ function rid(){return Math.random().toString(36).slice(2,10)}
+ var v=ls('hbt-v'),ret=v?'1':'0';if(!v){v=rid();ls('hbt-v',v)}
+ var s=rid(),t0=Date.now(),n=0,last='';
+ var ua=navigator.userAgent||'';
+ var dev=(/Mobi|Android|iPhone/.test(ua)?'Phone':/iPad|Tablet/.test(ua)?'Tablet':'Computer')+' · '+
+   (/Windows/.test(ua)?'Windows':/iPhone|iPad/.test(ua)?'iOS':/Android/.test(ua)?'Android':/Mac OS/.test(ua)?'Mac':'Other')+' · '+
+   (/Edg\//.test(ua)?'Edge':/Chrome\//.test(ua)?'Chrome':/Firefox\//.test(ua)?'Firefox':/Safari\//.test(ua)?'Safari':'Other');
+ function qs(e,d){return '?v='+v+'&s='+s+'&r='+ret+'&e='+encodeURIComponent(e)+'&d='+encodeURIComponent(d||'')+'&dev='+encodeURIComponent(dev)+'&t='+Math.round((Date.now()-t0)/1000)}
+ function send(e,d,url,beacon){if(++n>150)return;try{var u=(url||LOG)+qs(e,d);if(beacon&&navigator.sendBeacon)navigator.sendBeacon(u);else(new Image()).src=u}catch(x){}}
+ function view(x){var d=(typeof TOUR!=='undefined'&&TOUR.on?'demo: ':'')+x;if(d===last)return;last=d;send('view',d)}
+ send('open',UI.view);last=UI.view;
+ var la=+ls('hbt-a')||0;if(Date.now()-la>18e5){ls('hbt-a',String(Date.now()));send('open',UI.view,OPEN)}
+ try{var _go=go;go=function(x){_go(x);view(x)};
+     var _ts=tourStart;tourStart=function(){send('demo','started');_ts()};
+     var _te=tourEnd;tourEnd=function(){send('demo',TOUR.i>=STEPS.length-1?'finished':'closed at step '+(TOUR.i+1));_te()}}catch(x){}
+ var KEY={'in-copy':'copied pricing intake answers','want-copy':'copied feature wish list','pop-dial':'tried the call popup','call-now':'opened a call','mr-copy':'copied a meeting request','sig-copy':'copied a signature','change':'opened Request a change','promo-dial':'opened a theme-night call list'};
+ document.addEventListener('click',function(ev){var el=ev.target.closest&&ev.target.closest('[data-act]');if(el&&KEY[el.dataset.act])send('action',KEY[el.dataset.act])},true);
+ document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')send('leave',last,LOG,true)});
+})();
 </script>
 </body>
 </html>
